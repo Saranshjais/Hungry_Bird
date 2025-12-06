@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Admin – Vendor Submissions{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">Vendor submissions</h1>
+  <p class="text-muted mb-3">
+    Review user-submitted stalls and approve only the real ones.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="card-body table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Stall</th>
+            <th>City</th>
+            <th>Status</th>
+            <th>Submitted by</th>
+            <th>Maps link</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in submissions %}
+            <tr>
+              <td>{{ s.id }}</td>
+              <td>
+                <div class="fw-semibold">{{ s.stall_name }}</div>
+                <div class="small text-muted">{{ s.cuisine_type }}</div>
+              </td>
+              <td>{{ s.city.name }}</td>
+              <td>
+                <span class="badge rounded-pill
+                  {% if s.status == 'pending' %}text-bg-warning text-dark
+                  {% elif s.status == 'approved' %}text-bg-success
+                  {% else %}text-bg-secondary{% endif %}">
+                  {{ s.status }}
+                </span>
+              </td>
+              <td>
+                <div class="small">
+                  {{ s.submitted_by_name or "-" }}<br>
+                  <span class="text-muted">{{ s.submitted_by_email or "" }}</span>
+                </div>
+              </td>
+              <td class="small">
+                {% if s.google_maps_url %}
+                  <a href="{{ s.google_maps_url }}" target="_blank">Open</a>
+                {% else %}
+                  <span class="text-muted">No link</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if s.status == "pending" %}
+                  <a href="{{ url_for('admin.admin_approve_submission', submission_id=s.id) }}"
+                     class="btn btn-sm btn-success me-1">Approve</a>
+                  <a href="{{ url_for('admin.admin_reject_submission', submission_id=s.id) }}"
+                     class="btn btn-sm btn-outline-danger">Reject</a>
+                {% else %}
+                  <span class="text-muted small">No actions</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted small py-4">
+                No submissions yet.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
