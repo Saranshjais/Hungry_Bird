@@ -114,17 +114,19 @@
               <hr class="mt-2 mb-3">
 
               <div class="mb-3">
-                <label class="form-label">Google Maps link <span class="text-muted">(recommended)</span></label>
+                <label class="form-label">Google Maps link <span class="text-danger">*</span></label>
                 <div class="input-group">
                   <span class="input-group-text">📍</span>
-                  <input type="url" name="google_maps_url" class="form-control"
-                         placeholder="Paste Google Maps share link here">
+                  <input type="url" name="google_maps_url" class="form-control" required
+                        placeholder="Paste Google Maps link like: https://www.google.com/maps/@26.9124,75.7873">
                 </div>
                 <div class="form-text">
-                  Google Maps → long press to drop a pin → Share → Copy link → paste here.
+                  Google Maps → long press → Share → Copy link → paste here.
+                </div>
+                <div class="text-danger small">
+                  ⚠️ Must be a full Google Maps link (not short link)
                 </div>
               </div>
-
               <div class="mb-3">
                 <label class="form-label">Approx address / area</label>
                 <input type="text" name="approx_address" class="form-control"
