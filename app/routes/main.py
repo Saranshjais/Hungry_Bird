@@ -150,13 +150,23 @@ def submit_vendor():
                         lat = float(match.group(1))
                         lng = float(match.group(2))
 
-                # 4. Case 3: q=lat,lng
-                if lat is None and "q=" in google_maps_url:
-                    coords = google_maps_url.split("q=")[-1].split("&")[0]
-                    parts = coords.split(",")
-                    if len(parts) == 2:
-                        lat = float(parts[0])
-                        lng = float(parts[1])
+                # 4. Case 3: q= or query= lat,lng
+                if lat is None:
+                    param = None
+                    if "query=" in google_maps_url:
+                        param = "query="
+                    elif "q=" in google_maps_url:
+                        param = "q="
+                    
+                    if param:
+                        coords = google_maps_url.split(param)[-1].split("&")[0]
+                        parts = coords.split(",")
+                        if len(parts) == 2:
+                            try:
+                                lat = float(parts[0])
+                                lng = float(parts[1])
+                            except:
+                                pass
 
                 # 5. Validation
                 if lat is not None and (lat < -90 or lat > 90): lat = None
