@@ -2,13 +2,27 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from urllib.parse import urlparse, parse_qs
 import re
 
-from app import db
+from app import db, cache
 from app.models import City, Vendor, VendorSubmission
 
 # ✅ ML import
 from app.ml_model import build_recommendation_model, get_recommendations
 
 main_bp = Blueprint("main", __name__)
+
+
+@cache.memoize(timeout=3600)
+def get_cached_recommendations(city_id, vendor_list_tuple):
+    # We use a tuple for vendor_list because cache keys must be hashable
+    vendor_list = [dict(t) for t in vendor_list_tuple]
+    if not vendor_list:
+        return []
+    try:
+        df, similarity = build_recommendation_model(vendor_list)
+        return get_recommendations(vendor_list[0]["name"], df, similarity)
+    except Exception as e:
+        print("ML error:", e)
+        return []
 
 
 # -------------------- HOME --------------------
@@ -80,17 +94,9 @@ def city_page(slug):
         for v in vendors
     ]
 
-    recommendations = []
-
-    # ✅ THIS MUST ALIGN WITH vendor_list (same level)
-    if vendor_list:
-        try:
-            df, similarity = build_recommendation_model(vendor_list)
-            recommendations = get_recommendations(
-                vendor_list[0]["name"], df, similarity
-            )
-        except Exception as e:
-            print("ML error:", e)
+    # Convert list of dicts to tuple of tuples for caching
+    vendor_list_tuple = tuple(tuple(d.items()) for d in vendor_list)
+    recommendations = get_cached_recommendations(city.id, vendor_list_tuple)
 
     return render_template(
         "city.html",
